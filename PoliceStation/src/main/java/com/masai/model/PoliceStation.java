@@ -26,22 +26,22 @@ public class PoliceStation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@JsonProperty(access = Access.READ_ONLY)
-	Integer stationId;
+	private Integer stationId;
 	
 	@JsonProperty(access = Access.READ_ONLY)
-	String stationCode;
+	private String stationCode;
 	
-	String address;
+	private String address;
 	
 	@OneToOne
-	Police officerInCharge;
+	private Police officerInCharge;
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "policeStation")
-	List<Police> policeStationStaff;
+	private List<Police> policeStationStaff;
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "policeStation")
-	List<FIR> firs;
+	private List<FIR> firs;
 	
 }

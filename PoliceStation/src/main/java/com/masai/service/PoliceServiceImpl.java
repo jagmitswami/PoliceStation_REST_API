@@ -1,7 +1,5 @@
 package com.masai.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -37,9 +35,9 @@ public class PoliceServiceImpl implements PoliceService {
 	public Police registerPolice(Integer verficationId, Police police) throws UserException {
 		
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
-		Customer customer = customerRepo.findByPhone(phone).get();
+		Police existingPolice = policeRepo.findByPhone(phone).get();
 		
-		if(customer != null) throw new UserException("User is already registered with this mobile number");
+		if(existingPolice != null) throw new UserException("User is already registered with this mobile number");
 		
 		police.setRole("ROLE_POLICE");
 		
@@ -99,7 +97,5 @@ public class PoliceServiceImpl implements PoliceService {
 	public PoliceStation registerPoliceStation(int i, PoliceStation policeStation) {
 		return stationRepo.save(policeStation);
 	}
-
-	
 
 }

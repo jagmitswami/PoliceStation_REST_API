@@ -28,30 +28,30 @@ public class FIR {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@JsonProperty(access = Access.READ_ONLY)
-	Integer firId;
+	private Integer firId;
 	
 	@JsonProperty(access = Access.READ_ONLY)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:sss")
-	LocalDateTime timeStamp;
+	private LocalDateTime timeStamp;
 	
 	@JsonIgnore
 	@ManyToOne
-	Customer customer;
+	private Customer customer;
 	
 	@ManyToMany(cascade = CascadeType.ALL)
-	List<Criminal> criminals;
+	private List<Criminal> criminals;
 	
 	@JsonProperty(access = Access.READ_ONLY)
 	@ManyToOne
-	Police officerFiledFIR;
+	private Police officerFiledFIR;
 
 	@JsonProperty(access = Access.READ_ONLY)
 	@ManyToOne
-	Police officerClosedFIR;
+	private Police officerClosedFIR;
 	
 	@ManyToOne
-	PoliceStation policeStation;
+	private PoliceStation policeStation;
 	
-	boolean isOpen; 
+	private boolean isOpen; 
 	
 }

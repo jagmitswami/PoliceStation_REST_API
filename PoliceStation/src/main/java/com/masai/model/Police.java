@@ -27,32 +27,32 @@ public class Police{
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@JsonProperty(access = Access.READ_ONLY)
-	Integer policeId;
-	String firstName;   
-	String lastName;
-	String Phone;
-	String address;
-	Integer age;
-	String gender;
+	private Integer policeId;
+	private String firstName;   
+	private String lastName;
+	private String Phone;
+	private String address;
+	private Integer age;
+	private String gender;
 	
 	@JsonProperty(access = Access.WRITE_ONLY)
-	String password;
+	private String password;
 	
 	@JsonIgnore
-	String role;
+	private String role;
 	
-	String department;
+	private String department;
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "officerFiledFIR")
-	List<FIR> firsFiled;
+	private List<FIR> firsFiled;
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "officerClosedFIR")
-	List<FIR> firsClosed;
+	private List<FIR> firsClosed;
 	
 	@JsonIgnore
 	@ManyToOne
-	PoliceStation policeStation;
+	private PoliceStation policeStation;
 	
 }
