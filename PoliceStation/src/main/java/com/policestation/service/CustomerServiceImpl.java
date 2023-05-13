@@ -7,13 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.policestation.exception.FIRException;
-import com.policestation.exception.LoginException;
 import com.policestation.exception.PoliceException;
 import com.policestation.exception.PoliceStationException;
 import com.policestation.exception.UserException;
 import com.policestation.model.Customer;
 import com.policestation.model.FIR;
-import com.policestation.model.Police;
+import com.policestation.model.PoliceDTO;
 import com.policestation.model.PoliceStation;
 import com.policestation.model.Status;
 import com.policestation.repository.CustomerRepo;
@@ -50,21 +49,21 @@ public class CustomerServiceImpl implements CustomerService{
 	}
 
 	@Override
-	public FIR fileFIR(FIR fir, Integer policeOfficerId, Integer policeStationId) throws LoginException, UserException, PoliceException, PoliceStationException {
+	public FIR fileFIR(FIR fir, Integer policeOfficerId, Integer policeStationId) throws PoliceException, PoliceStationException {
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
 		Customer customer = customerRepo.findByPhone(phone).get();
 		
-		Police police = policeRepo.findById(policeOfficerId).orElseThrow(()-> new PoliceException("Invalid police staff id passed"));
+		PoliceDTO policeDTO = policeRepo.findById(policeOfficerId).orElseThrow(()-> new PoliceException("Invalid police staff id passed"));
 		
 		PoliceStation policeStation = stationRepo.findById(policeStationId).orElseThrow(()-> new PoliceStationException("Invalid police station id passed"));
 		
 		fir.setOpen(true);
 		fir.setStatus(Status.valueOf("Open"));
 		fir.setFiledTime(LocalDateTime.now());
-		fir.setOfficerFiledFIR(police);
+		fir.setOfficerFiledFIR(policeDTO);
 		fir.setPoliceStation(policeStation);
 		
-		police.getFirsFiled().add(fir);
+		policeDTO.getFirsFiled().add(fir);
 		policeStation.getFirs().add(fir);
 		
 		customer.getFirs().add(fir);
@@ -74,7 +73,7 @@ public class CustomerServiceImpl implements CustomerService{
 	}
 
 	@Override
-	public String withdrawFIR(Integer firId) throws LoginException, UserException, FIRException {
+	public String withdrawFIR(Integer firId) throws FIRException {
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
 		Customer customer = customerRepo.findByPhone(phone).get();
 		

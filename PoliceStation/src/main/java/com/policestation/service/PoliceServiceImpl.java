@@ -8,27 +8,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.policestation.exception.FIRException;
-import com.policestation.exception.LoginException;
 import com.policestation.exception.PoliceException;
 import com.policestation.exception.PoliceStationException;
 import com.policestation.exception.UnauthorizedException;
 import com.policestation.exception.UserException;
+import com.policestation.model.Customer;
 import com.policestation.model.FIR;
-import com.policestation.model.Police;
 import com.policestation.model.PoliceStation;
 import com.policestation.model.Status;
 import com.policestation.repository.CustomerRepo;
 import com.policestation.repository.FIRRepo;
-import com.policestation.repository.PoliceRepo;
 import com.policestation.repository.PoliceStationRepo;
 
 public class PoliceServiceImpl implements PoliceService {
 	
 	@Autowired
 	CustomerRepo customerRepo;
-	
-	@Autowired
-	PoliceRepo policeRepo;
 	
 	@Autowired
 	PoliceStationRepo stationRepo;
@@ -38,39 +33,47 @@ public class PoliceServiceImpl implements PoliceService {
 	
 	//any
 	@Override
-	public Police registerPolice(Integer verficationId, Police police) throws UserException {
+	public Customer registerPolice(Integer verficationId, Customer customer) throws UserException, UnauthorizedException {
+		
+		if(verficationId != 8080) {
+			throw new UnauthorizedException("Unauthorized request");
+		}
 		
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
-		Police existingPolice = policeRepo.findByPhone(phone).get();
+		Customer existingCustomer = customerRepo.findByPhone(phone).get();
 		
-		if(existingPolice != null) throw new UserException("User is already registered with this mobile number");
+		if(existingCustomer != null && existingCustomer.getRole().equals("ROLE_POLICE")) {
+			throw new UserException("Your account is already registered");
+		}
 		
-		police.setRole("ROLE_POLICE");
+		customer.setRole("ROLE_POLICE");
 		
-		police = policeRepo.save(police);
-		
-		return police;
+		return customerRepo.save(customer);
 		
 	}
 
 	//sho
 	@Override
-	public Police closedMaxCases() throws FIRException, UserException, LoginException, UnauthorizedException {
+	public Customer closedMaxCases() throws UserException{
 		
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
-		Police sho = policeRepo.findByPhone(phone).get();
+		Customer sho = customerRepo.findByPhone(phone).get();
 		
 		PoliceStation policeStation = sho.getPoliceStation();
 		
-		List<Police> polices = policeStation.getPoliceStationStaff();
+		List<Customer> polices = policeStation.getPoliceStationStaff();
 		int max = 0;
-		Police police = null;
+		Customer police = null;
 		
-		for(Police p : polices) {
+		for(Customer p : polices) {
 			if(max < p.getFirsClosed().size()) {
 				police = p;
 				max = p.getFirsClosed().size();
 			}
+		}
+		
+		if(police == null) {
+			throw new UserException("No record found");
 		}
 		
 		return police;
@@ -81,11 +84,11 @@ public class PoliceServiceImpl implements PoliceService {
 		@Override
 		public PoliceStation registerPoliceStation(Integer shoId, PoliceStation policeStation) throws PoliceException {
 			
-			Optional<Police> opt = policeRepo.findById(shoId);
+			Optional<Customer> opt = customerRepo.findById(shoId);
 			if(opt.isEmpty()) {
 				throw new PoliceException("No police staff found with id : " + shoId);
 			}
-			Police sho = opt.get();
+			Customer sho = opt.get();
 			
 			policeStation.setOfficerInCharge(sho);
 			
@@ -96,7 +99,7 @@ public class PoliceServiceImpl implements PoliceService {
 	//admin
 	@Override
 	public String assignPoliceStationToPolice(Integer policeId, Integer policeStationId) throws PoliceException, PoliceStationException {
-		Optional<Police> optPolice = policeRepo.findById(policeId);
+		Optional<Customer> optPolice = customerRepo.findById(policeId);
 
 		if(optPolice.isEmpty()) {
 			throw new PoliceException("No Police staff found with id : "+ policeStationId);
@@ -108,7 +111,12 @@ public class PoliceServiceImpl implements PoliceService {
 			throw new PoliceStationException("No Police station found with id : "+ policeStationId);
 		}
 		
-		Police police = optPolice.get();
+		Customer police = optPolice.get();
+		
+		if(!police.getRole().equals("ROLE_POLICE")) {
+			throw new PoliceException("No Police staff found with id : "+ policeStationId);
+		}
+		
 		PoliceStation policeStation = optStation.get();
 		
 		police.setPoliceStation(policeStation);
@@ -123,7 +131,7 @@ public class PoliceServiceImpl implements PoliceService {
 	//admin
 	@Override
 	public String changePoliceStationOfPolice(Integer policeId, Integer policeStationId) throws PoliceException, PoliceStationException {
-		Optional<Police> optPolice = policeRepo.findById(policeId);
+		Optional<Customer> optPolice = customerRepo.findById(policeId);
 
 		if(optPolice.isEmpty()) {
 			throw new PoliceException("No Police staff found with id : "+ policeStationId);
@@ -135,7 +143,12 @@ public class PoliceServiceImpl implements PoliceService {
 			throw new PoliceStationException("No Police station found with id : "+ policeStationId);
 		}
 		
-		Police police = optPolice.get();
+		Customer police = optPolice.get();
+		
+		if(!police.getRole().equals("ROLE_POLICE")) {
+			throw new PoliceException("No Police staff found with id : "+ policeStationId);
+		}
+		
 		PoliceStation policeStation = optStation.get();
 		
 		police.setPoliceStation(policeStation);
@@ -149,9 +162,9 @@ public class PoliceServiceImpl implements PoliceService {
 
 	//police
 	@Override
-	public String closeCase(Integer firId) throws PoliceException, UnauthorizedException, LoginException, UserException, FIRException {
+	public String closeCase(Integer firId) throws FIRException {
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
-		Police police = policeRepo.findByPhone(phone).get();
+		Customer police = customerRepo.findByPhone(phone).get();
 		
 		FIR fir = null;
 		

@@ -50,11 +50,11 @@ public class FIR {
 	
 	@JsonProperty(access = Access.READ_ONLY)
 	@ManyToOne(cascade = CascadeType.ALL)
-	private Police officerFiledFIR;
+	private Customer officerFiledFIR;
 
 	@JsonProperty(access = Access.READ_ONLY)
 	@ManyToOne(cascade = CascadeType.ALL)
-	private Police officerClosedFIR;
+	private Customer officerClosedFIR;
 	
 	@JsonProperty(access = Access.READ_ONLY)
 	@ManyToOne(cascade = CascadeType.ALL)

@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,5 +47,17 @@ public class Customer {
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
 	private List<FIR> firs = new ArrayList<>();
+	
+	@JsonIgnore
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "officerFiledFIR")
+	private List<FIR> firsFiled = new ArrayList<>();
+	
+	@JsonIgnore
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "officerClosedFIR")
+	private List<FIR> firsClosed = new ArrayList<>();
+	
+	@JsonIgnore
+	@ManyToOne(cascade = CascadeType.ALL)
+	private PoliceStation policeStation;
 	
 }

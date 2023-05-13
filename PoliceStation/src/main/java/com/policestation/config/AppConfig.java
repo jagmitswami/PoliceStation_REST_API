@@ -16,7 +16,7 @@ public class AppConfig {
 		http
 		.csrf().disable()
 		.authorizeHttpRequests()
-		.requestMatchers("/eventscheduler/user/register").permitAll()
+		.requestMatchers("/policestation/users/register", "/policestation/polices/register").permitAll()
 		.anyRequest().authenticated().and()
 		.formLogin()
 		.and()

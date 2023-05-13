@@ -35,11 +35,11 @@ public class PoliceStation {
 	
 	@JsonProperty(access = Access.READ_ONLY)
 	@OneToOne
-	private Police officerInCharge;
+	private Customer officerInCharge;
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "policeStation")
-	private List<Police> policeStationStaff = new ArrayList<>();
+	private List<Customer> policeStationStaff = new ArrayList<>();
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "policeStation")
