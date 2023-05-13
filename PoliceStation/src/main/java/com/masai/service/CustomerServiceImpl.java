@@ -1,6 +1,7 @@
 package com.masai.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,10 +9,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.masai.exception.FIRException;
 import com.masai.exception.LoginException;
 import com.masai.exception.PoliceException;
+import com.masai.exception.PoliceStationException;
 import com.masai.exception.UserException;
 import com.masai.model.Customer;
 import com.masai.model.FIR;
+import com.masai.model.Police;
 import com.masai.model.PoliceStation;
+import com.masai.model.Status;
 import com.masai.repository.CustomerRepo;
 import com.masai.repository.FIRRepo;
 import com.masai.repository.PoliceRepo;
@@ -38,7 +42,7 @@ public class CustomerServiceImpl implements CustomerService{
 		
 		if(resgisteredUser != null) throw new UserException("User is already registered with this mobile number");
 		
-		customer.setRole("ROLE_USER");
+		customer.setRole("ROLE_CUSTOMER");
 		
 		customer = customerRepo.save(customer);
 		
@@ -46,17 +50,24 @@ public class CustomerServiceImpl implements CustomerService{
 	}
 
 	@Override
-	public FIR fileFIR(FIR fir) throws LoginException, UserException, PoliceException {
+	public FIR fileFIR(FIR fir, Integer policeOfficerId, Integer policeStationId) throws LoginException, UserException, PoliceException, PoliceStationException {
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
 		Customer customer = customerRepo.findByPhone(phone).get();
 		
-		fir.setApplicantId(customer.getUserId());
+		Police police = policeRepo.findById(policeOfficerId).orElseThrow(()-> new PoliceException("Invalid police staff id passed"));
 		
-		PoliceStation policeStation = stationRepo.findById(fir.getPoliceStationId()).orElseThrow(()-> new PoliceException("Invalid police station id passed"));
+		PoliceStation policeStation = stationRepo.findById(policeStationId).orElseThrow(()-> new PoliceStationException("Invalid police station id passed"));
 		
-		policeStation.getFirList().add(fir.getFirId());
+		fir.setOpen(true);
+		fir.setStatus(Status.valueOf("Open"));
+		fir.setFiledTime(LocalDateTime.now());
+		fir.setOfficerFiledFIR(police);
+		fir.setPoliceStation(policeStation);
 		
-		stationRepo.save(policeStation);
+		police.getFirsFiled().add(fir);
+		policeStation.getFirs().add(fir);
+		
+		customer.getFirs().add(fir);
 		
 		return firRepo.save(fir);
 		
@@ -67,21 +78,36 @@ public class CustomerServiceImpl implements CustomerService{
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
 		Customer customer = customerRepo.findByPhone(phone).get();
 		
-		FIR fir = firRepo.findByApplicantIdAndFirId(customer.getUserId(), firId);
+		FIR fir = null;
 		
-		if(LocalDateTime.now().isAfter(fir.getTimeStamp().plusHours(24))){
+		List<FIR> firs = customer.getFirs();
+		for(FIR f : firs) {
+			if(f.getFirId() == firId) {
+				fir = f;
+				break;
+			}
+		}
+		
+		if(fir == null) {
+			throw new FIRException("No FIR found with id : " + firId);
+		}
+		
+		if(LocalDateTime.now().isAfter(fir.getFiledTime().plusHours(24))){
 			throw new FIRException("Time limit over to withraw FIR");
 		}
 		
 		if(!fir.isOpen()) {
-			throw new FIRException("FIR already closed");
+			throw new FIRException("FIR is already closed");
 		}
 		
-		firRepo.delete(fir);
+		fir.setOpen(false);
+		fir.setStatus(Status.valueOf("Withdrawn"));
+		fir.setClosedTime(LocalDateTime.now());
 		
-		return "FIR withrawl successfull";
+		firRepo.save(fir);
+		
+		return "FIR withrawn successfully";
+		
 	}
-
 	
-
 }

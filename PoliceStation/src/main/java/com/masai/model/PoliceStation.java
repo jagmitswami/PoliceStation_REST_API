@@ -1,5 +1,6 @@
 package com.masai.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,20 +29,20 @@ public class PoliceStation {
 	@JsonProperty(access = Access.READ_ONLY)
 	private Integer stationId;
 	
-	@JsonProperty(access = Access.READ_ONLY)
-	private String stationCode;
+	private String telephone;
 	
 	private String address;
 	
+	@JsonProperty(access = Access.READ_ONLY)
 	@OneToOne
 	private Police officerInCharge;
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "policeStation")
-	private List<Police> policeStationStaff;
+	private List<Police> policeStationStaff = new ArrayList<>();
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "policeStation")
-	private List<FIR> firs;
+	private List<FIR> firs = new ArrayList<>();
 	
 }

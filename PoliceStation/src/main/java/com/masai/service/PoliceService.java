@@ -3,9 +3,9 @@ package com.masai.service;
 import com.masai.exception.FIRException;
 import com.masai.exception.LoginException;
 import com.masai.exception.PoliceException;
+import com.masai.exception.PoliceStationException;
 import com.masai.exception.UnauthorizedException;
 import com.masai.exception.UserException;
-import com.masai.model.FIR;
 import com.masai.model.Police;
 import com.masai.model.PoliceStation;
 
@@ -15,12 +15,12 @@ public interface PoliceService {
 	
 	public Police closedMaxCases() throws FIRException, UserException, LoginException, UnauthorizedException;
 	
-	public FIR getOldestFIR() throws FIRException;
+	public String assignPoliceStationToPolice(Integer policeId, Integer policeStationId) throws PoliceException, PoliceStationException;
 	
-	public String deletePolice(Integer policeId) throws PoliceException;
+	public String changePoliceStationOfPolice(Integer policeId, Integer policeStationId) throws PoliceException, PoliceStationException;
 	
-	public String closeCase(Integer firId) throws PoliceException, UnauthorizedException, LoginException, UserException;
+	public String closeCase(Integer firId) throws PoliceException, UnauthorizedException, LoginException, UserException, FIRException;
 
-	public PoliceStation registerPoliceStation(int i, PoliceStation policeStation);
+	public PoliceStation registerPoliceStation(Integer shoId, PoliceStation policeStation) throws PoliceException;
 	
 }

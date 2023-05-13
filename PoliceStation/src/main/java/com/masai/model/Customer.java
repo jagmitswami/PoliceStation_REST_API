@@ -1,5 +1,6 @@
 package com.masai.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,6 +45,6 @@ public class Customer {
 	
 	@JsonIgnore
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
-	private List<FIR> firs;
+	private List<FIR> firs = new ArrayList<>();
 	
 }

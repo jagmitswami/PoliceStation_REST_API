@@ -1,6 +1,7 @@
 package com.masai.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -10,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,26 +35,37 @@ public class FIR {
 	
 	@JsonProperty(access = Access.READ_ONLY)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:sss")
-	private LocalDateTime timeStamp;
+	private LocalDateTime filedTime;
+	
+	@JsonProperty(access = Access.READ_ONLY)
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:sss")
+	private LocalDateTime closedTime;
 	
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	private Customer customer;
 	
 	@ManyToMany(cascade = CascadeType.ALL)
-	private List<Criminal> criminals;
+	private List<Criminal> criminals = new ArrayList<>();
 	
 	@JsonProperty(access = Access.READ_ONLY)
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	private Police officerFiledFIR;
 
 	@JsonProperty(access = Access.READ_ONLY)
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	private Police officerClosedFIR;
 	
-	@ManyToOne
+	@JsonProperty(access = Access.READ_ONLY)
+	@ManyToOne(cascade = CascadeType.ALL)
 	private PoliceStation policeStation;
 	
-	private boolean isOpen; 
+	@JsonProperty(access = Access.READ_ONLY)
+	@Enumerated(EnumType.STRING)
+	private Status status;
+	
+	private String context;
+	
+	private boolean isOpen;
 	
 }
