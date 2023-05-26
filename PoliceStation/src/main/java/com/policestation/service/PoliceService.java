@@ -10,7 +10,7 @@ import com.policestation.model.PoliceStation;
 
 public interface PoliceService {
 
-	public Customer registerPolice(Integer verficationId, Customer customer) throws UserException, UnauthorizedException;
+	public Customer registerPolice(Integer verficationId) throws UserException, UnauthorizedException;
 	
 	public Customer closedMaxCases() throws UserException;
 	

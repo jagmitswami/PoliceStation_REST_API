@@ -31,18 +31,18 @@ public class PoliceServiceImpl implements PoliceService {
 	@Autowired
 	FIRRepo firRepo;
 	
-	//any
+	//user
 	@Override
-	public Customer registerPolice(Integer verficationId, Customer customer) throws UserException, UnauthorizedException {
+	public Customer registerPolice(Integer verficationId) throws UserException, UnauthorizedException {
 		
 		if(verficationId != 8080) {
 			throw new UnauthorizedException("Unauthorized request");
 		}
 		
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
-		Customer existingCustomer = customerRepo.findByPhone(phone).get();
+		Customer customer = customerRepo.findByPhone(phone).get();
 		
-		if(existingCustomer != null && existingCustomer.getRole().equals("ROLE_POLICE")) {
+		if(customer.getRole().equals("ROLE_POLICE")) {
 			throw new UserException("Your account is already registered");
 		}
 		
@@ -89,8 +89,10 @@ public class PoliceServiceImpl implements PoliceService {
 				throw new PoliceException("No police staff found with id : " + shoId);
 			}
 			Customer sho = opt.get();
+			sho.setRole("ROLE_SHO");
 			
 			policeStation.setOfficerInCharge(sho);
+			customerRepo.save(sho);
 			
 			return stationRepo.save(policeStation);
 			

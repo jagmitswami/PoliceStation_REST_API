@@ -12,21 +12,16 @@ import com.policestation.exception.PoliceStationException;
 import com.policestation.exception.UserException;
 import com.policestation.model.Customer;
 import com.policestation.model.FIR;
-import com.policestation.model.PoliceDTO;
 import com.policestation.model.PoliceStation;
 import com.policestation.model.Status;
 import com.policestation.repository.CustomerRepo;
 import com.policestation.repository.FIRRepo;
-import com.policestation.repository.PoliceRepo;
 import com.policestation.repository.PoliceStationRepo;
 
 public class CustomerServiceImpl implements CustomerService{
 	
 	@Autowired
 	CustomerRepo customerRepo;
-	
-	@Autowired
-	PoliceRepo policeRepo;
 	
 	@Autowired
 	PoliceStationRepo stationRepo;
@@ -53,17 +48,20 @@ public class CustomerServiceImpl implements CustomerService{
 		String phone = SecurityContextHolder.getContext().getAuthentication().getName();
 		Customer customer = customerRepo.findByPhone(phone).get();
 		
-		PoliceDTO policeDTO = policeRepo.findById(policeOfficerId).orElseThrow(()-> new PoliceException("Invalid police staff id passed"));
+		Customer police = customerRepo.findById(policeOfficerId).orElseThrow(()-> new PoliceException("Invalid police staff id passed"));
+		if(police.getRole().equals("ROLE_CUSTOMER")) {
+			new PoliceException("Invalid police staff id passed");
+		}
 		
 		PoliceStation policeStation = stationRepo.findById(policeStationId).orElseThrow(()-> new PoliceStationException("Invalid police station id passed"));
 		
 		fir.setOpen(true);
 		fir.setStatus(Status.valueOf("Open"));
 		fir.setFiledTime(LocalDateTime.now());
-		fir.setOfficerFiledFIR(policeDTO);
+		fir.setOfficerFiledFIR(police);
 		fir.setPoliceStation(policeStation);
 		
-		policeDTO.getFirsFiled().add(fir);
+		police.getFirsFiled().add(fir);
 		policeStation.getFirs().add(fir);
 		
 		customer.getFirs().add(fir);
